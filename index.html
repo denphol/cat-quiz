@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>วันนี้คุณเหมือนแมวพันธุ์ไหน?</title>
+<style>
+  :root {
+    --bg: #FBF3E7;
+    --card-bg: #FFFFFF;
+    --text-dark: #4A3F35;
+    --text-light: #8A7B6C;
+    --accent: #E8A87C;
+    --accent-dark: #D98C5F;
+    --sage: #B5C99A;
+    --border: #EDE0D0;
+    --shadow: rgba(74, 63, 53, 0.08);
+
+    --orange-color: #E8965B;
+    --persian-color: #C9BFAE;
+    --siamese-color: #8C7A6B;
+    --british-color: #8FA0A8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Noto Sans Thai', 'Sarabun', sans-serif;
+    background: linear-gradient(160deg, #FBF3E7 0%, #F5E9D8 100%);
+    color: var(--text-dark);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .app-container {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 28px;
+    padding: 40px 32px;
+    box-shadow: 0 10px 40px var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .screen {
+    display: none;
+  }
+
+  .screen.active {
+    display: block;
+    animation: fadeSlideIn 0.5s ease forwards;
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeSlideOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-16px); }
+  }
+
+  .screen.exiting {
+    animation: fadeSlideOut 0.35s ease forwards;
+  }
+
+  /* --- Start Screen --- */
+  .start-emoji {
+    font-size: 64px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: 26px;
+    text-align: center;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 16px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 6px 16px rgba(232, 168, 124, 0.35);
+  }
+
+  .btn:hover {
+    background: var(--accent-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(232, 168, 124, 0.45);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  /* --- Quiz Screen --- */
+  .progress-wrap {
+    margin-bottom: 28px;
+  }
+
+  .progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--sage));
+    border-radius: 8px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-light);
+    text-align: right;
+  }
+
+  .question-text {
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    min-height: 60px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option-btn {
+    text-align: left;
+    padding: 16px 18px;
+    border-radius: 16px;
+    border: 2px solid var(--border);
+    background: #FFFDF9;
+    color: var(--text-dark);
+    font-size: 15px;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .option-btn:hover {
+    border-color: var(--accent);
+    background: #FFF6EC;
+    transform: translateX(4px);
+  }
+
+  .option-btn.selected {
+    border-color: var(--accent-dark);
+    background: #FBE7D4;
+  }
+
+  .option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--sage);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    margin-right: 10px;
+  }
+
+  /* --- Result Screen --- */
+  .result-img-wrap {
+    width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+
+  .result-img-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .result-tag {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+
+  .result-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .result-color {
+    font-size: 15px;
+    color: var(--text-light);
+    margin-bottom: 18px;
+  }
+
+  .result-desc {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-dark);
+    margin-bottom: 28px;
+  }
+
+  .score-bars {
+    margin-bottom: 28px;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+
+  .score-row .label {
+    width: 90px;
+    flex-shrink: 0;
+    color: var(--text-light);
+  }
+
+  .score-row .bar-bg {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .score-row .bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 0.6s ease;
+    width: 0%;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 480px) {
+    .card { padding: 28px 20px; border-radius: 20px; }
+    h1 { font-size: 22px; }
+    .question-text { font-size: 17px; }
+    .result-title { font-size: 21px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="card">
+
+    <!-- Start Screen -->
+    <div class="screen active" id="screen-start">
+      <div class="start-emoji">🐾</div>
+      <h1>วันนี้คุณเหมือนแมวพันธุ์ไหน สีไหนมากที่สุด?</h1>
+      <p class="subtitle">
+        ตอบคำถามสนุกๆ 5 ข้อ เกี่ยวกับพลังงาน อารมณ์ และไลฟ์สไตล์ของคุณวันนี้<br>
+        แล้วมาดูกันว่าคุณคือแมวพันธุ์ไหนในวันนี้
+      </p>
+      <button class="btn" id="btn-start">เริ่มทำแบบทดสอบ</button>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="screen" id="screen-quiz">
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-label" id="progress-label">ข้อ 1 / 5</div>
+      </div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options-container"></div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="screen" id="screen-result">
+      <div class="result-img-wrap">
+        <img id="result-img" src="orange.png" alt="ผลลัพธ์แมวประจำวัน">
+      </div>
+      <span class="result-tag" id="result-tag"></span>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-color" id="result-color"></div>
+      <div class="result-desc" id="result-desc"></div>
+
+      <div class="score-bars" id="score-bars"></div>
+
+      <button class="btn" id="btn-restart">เล่นอีกครั้ง (Play Again)</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  // ---------------------------
+  // คลังคำถามทั้งหมด 10 ข้อ
+  // แต่ละตัวเลือกผูกกับประเภทแมว: orange, persian, siamese, british
+  // ---------------------------
+  const QUESTION_BANK = [
+    {
+      question: "เมื่อตื่นนอนตอนเช้า พลังงานของคุณเป็นแบบไหน?",
+      options: [
+        { text: "พุ่งพล่านทันที อยากลุกไปทำอะไรสักอย่าง", type: "orange" },
+        { text: "ยังไม่อยากลุกจากเตียง ขอเนือยๆ อีกสักหน่อย", type: "persian" },
+        { text: "ตื่นแล้วคิดฟุ้งซ่าน เพ้อฝันเรื่อยเปื่อย", type: "siamese" },
+        { text: "ตื่นแบบสงบนิ่ง ค่อยๆ เตรียมตัวอย่างมีสติ", type: "british" }
+      ]
+    },
+    {
+      question: "ถ้าวันนี้มีเวลาว่างทั้งวัน คุณจะเลือกทำอะไร?",
+      options: [
+        { text: "ออกไปวิ่งเล่น ทำกิจกรรมกลางแจ้ง ซนๆ", type: "orange" },
+        { text: "นอนดูซีรีส์ยาวๆ ห่มผ้าห่มนุ่มๆ", type: "persian" },
+        { text: "อ่านหนังสือ ฟังเพลงเหงาๆ คิดเรื่องลึกลับ", type: "siamese" },
+        { text: "จัดบ้าน ทำอาหาร ดูแลคนรอบข้าง", type: "british" }
+      ]
+    },
+    {
+      question: "เมื่อเจอความเครียด คุณรับมือแบบไหน?",
+      options: [
+        { text: "ระบายออกทันที หากิจกรรมทำให้หายเครียดไวๆ", type: "orange" },
+        { text: "หนีไปนอนพัก ปิดโลกไปสักพัก", type: "persian" },
+        { text: "ครุ่นคิด วิเคราะห์อยู่คนเดียวเงียบๆ", type: "siamese" },
+        { text: "ตั้งสติ วางแผนแก้ปัญหาอย่างใจเย็น", type: "british" }
+      ]
+    },
+    {
+      question: "อาหารที่อยากกินที่สุดตอนนี้คือ?",
+      options: [
+        { text: "ของทอดกรอบๆ เผ็ดๆ จัดเต็มรสชาติ", type: "orange" },
+        { text: "ของหวาน ไอศกรีม ขนมเนื้อนุ่ม", type: "persian" },
+        { text: "อาหารแปลกใหม่ เมนูที่ไม่เคยลอง", type: "siamese" },
+        { text: "อาหารคอมฟอร์ตฟู้ด ต้มจืด ซุปอุ่นๆ", type: "british" }
+      ]
+    },
+    {
+      question: "เพื่อนชวนไปงานปาร์ตี้ที่ไม่รู้จักใครเลย คุณจะทำอย่างไร?",
+      options: [
+        { text: "เดินเข้าไปทักทายทุกคนแบบไม่เกร็ง", type: "orange" },
+        { text: "ไปแป๊บเดียวแล้วขอตัวกลับไปนอน", type: "persian" },
+        { text: "ยืนสังเกตคนอื่นเงียบๆ อยู่มุมหนึ่ง", type: "siamese" },
+        { text: "หาเพื่อนสนิทคุยลึกๆ ดีกว่าเดินทั่วงาน", type: "british" }
+      ]
+    },
+    {
+      question: "เพลงแบบไหนที่ตรงกับอารมณ์วันนี้ของคุณ?",
+      options: [
+        { text: "เพลงจังหวะสนุกๆ เต้นตามได้ทันที", type: "orange" },
+        { text: "เพลงชิลล์ๆ ฟังแล้วง่วงสบาย", type: "persian" },
+        { text: "เพลงแนวทดลอง แปลกหู มีมิติซ่อนอยู่", type: "siamese" },
+        { text: "เพลงบัลลาดนุ่มๆ ฟังแล้วอุ่นใจ", type: "british" }
+      ]
+    },
+    {
+      question: "ถ้าต้องเลือกสัตว์เลี้ยงคู่ใจ (นอกจากแมว) จะเลือกตัวไหน?",
+      options: [
+        { text: "สุนัขพลังงานล้น วิ่งเล่นได้ทั้งวัน", type: "orange" },
+        { text: "กระต่ายขนนุ่มที่ชอบนอนขดตัว", type: "persian" },
+        { text: "นกฮูกลึกลับที่ตื่นกลางคืน", type: "siamese" },
+        { text: "ช้างใจดีที่คอยดูแลฝูง", type: "british" }
+      ]
+    },
+    {
+      question: "เมื่อมีคนมาขอความช่วยเหลือ คุณมักจะทำอย่างไร?",
+      options: [
+        { text: "รีบวิ่งไปช่วยทันทีด้วยความกระตือรือร้น", type: "orange" },
+        { text: "ช่วยได้แต่ขอเวลาตั้งตัวสักครู่ก่อน", type: "persian" },
+        { text: "คิดวิเคราะห์หาทางแก้ที่แปลกใหม่ให้", type: "siamese" },
+        { text: "อยู่เคียงข้างให้กำลังใจอย่างมั่นคง", type: "british" }
+      ]
+    },
+    {
+      question: "สไตล์การแต่งตัวที่คุณชอบที่สุด?",
+      options: [
+        { text: "สีสันสดใส ลายจัดจ้าน โดดเด่นสะดุดตา", type: "orange" },
+        { text: "โทนสีขาวพาสเทล นุ่มนวล สบายตา", type: "persian" },
+        { text: "มินิมอลลึกลับ โทนดำ-เทาตัดกัน", type: "siamese" },
+        { text: "โทนเอิร์ธโทน อบอุ่น ดูน่าเชื่อถือ", type: "british" }
+      ]
+    },
+    {
+      question: "เป้าหมายชีวิตของคุณตอนนี้คืออะไร?",
+      options: [
+        { text: "ออกไปผจญภัย ใช้ชีวิตให้สนุกทุกวัน", type: "orange" },
+        { text: "มีเวลาพักผ่อนมากขึ้น ใช้ชีวิตแบบสโลว์ไลฟ์", type: "persian" },
+        { text: "ค้นหาตัวตน เข้าใจความหมายลึกๆ ของชีวิต", type: "siamese" },
+        { text: "สร้างความมั่นคงให้ตัวเองและคนที่รัก", type: "british" }
+      ]
+    }
+  ];
+
+  // ---------------------------
+  // คลังผลลัพธ์แมว 4 แบบ
+  // ---------------------------
+  const RESULTS = {
+    orange: {
+      name: "แมวส้ม (Orange Tabby)",
+      color: "สีส้ม / น้ำตาลทอง",
+      tagColor: "#E8965B",
+      img: "orange.png",
+      desc: "วันนี้คุณคือแมวส้มตัวเป้ง! พลังงานล้นเหลือ ซุกซน ขี้เล่น และมีความสุขได้ง่ายๆ กับเรื่องเล็กน้อยรอบตัว คุณพร้อมลุยทุกสถานการณ์ด้วยรอยยิ้ม ชอบเข้าสังคม ทักทายคนแปลกหน้าได้อย่างเป็นธรรมชาติ และมักจะเป็นตัวกลางที่ทำให้บรรยากาศรอบตัวสนุกสนานขึ้นเสมอ ข้อควรระวังคือบางครั้งพลังที่มากเกินไปอาจทำให้ใจร้อนหรือหุนหันพลันแล่นได้ ลองใช้พลังงานนี้ไปกับสิ่งที่สร้างสรรค์ แล้ววันของคุณจะยิ่งสดใสกว่าเดิม"
+    },
+    persian: {
+      name: "แมวเปอร์เซียสีขาว (White Persian)",
+      color: "สีขาวบริสุทธิ์",
+      tagColor: "#C9BFAE",
+      img: "persian.png",
+      desc: "วันนี้คุณคือแมวเปอร์เซียสีขาวสุดหรู นิ่งสงบ ขี้เซา และรักความสงบเป็นชีวิตจิตใจ คุณกำลังต้องการเวลาพักผ่อนและเติมพลังให้ตัวเอง ไม่อยากถูกรบกวนจากความวุ่นวายภายนอกมากนัก คุณให้คุณค่ากับความสบายและบรรยากาศอบอุ่น ชอบอยู่ในพื้นที่ปลอดภัยของตัวเอง แม้จะดูเหมือนเฉื่อยชา แต่จริงๆ แล้วคุณกำลังสะสมพลังงานไว้สำหรับสิ่งสำคัญ อย่าลืมให้เวลาตัวเองได้พักอย่างเต็มที่ในวันนี้"
+    },
+    siamese: {
+      name: "แมววิเชียรมาศ (Siamese Cat)",
+      color: "สีครีมตัดสีน้ำตาลเข้ม (Seal Point)",
+      tagColor: "#8C7A6B",
+      img: "siamese.png",
+      desc: "วันนี้คุณคือแมววิเชียรมาศ ช่างคิด ช่างจินตนาการ และมีเสน่ห์แบบลึกลับชวนให้ค้นหา คุณมักจะจมอยู่กับความคิดของตัวเอง ชอบตั้งคำถามกับสิ่งรอบตัว และมองเห็นมุมมองที่คนอื่นอาจมองข้าม ความเป็นตัวของตัวเองสูง มีไอเดียสร้างสรรค์แปลกใหม่อยู่เสมอ แต่บางครั้งก็อาจดูเข้าถึงยากเพราะไม่ค่อยเปิดเผยความรู้สึกทั้งหมด วันนี้ลองปล่อยให้ความคิดสร้างสรรค์ของคุณได้ทำงานอย่างเต็มที่ แล้วแบ่งปันมันกับคนที่ไว้ใจดูบ้าง"
+    },
+    british: {
+      name: "แมวบริติช ช็อตแฮร์ สีเทา (British Shorthair)",
+      color: "สีเทาน้ำเงิน (Blue/Grey)",
+      tagColor: "#8FA0A8",
+      img: "british.png",
+      desc: "วันนี้คุณคือแมวบริติช ช็อตแฮร์ สีเทา สุขุม นุ่มลึก และเป็นที่พึ่งพาได้ของคนรอบข้าง คุณมีความมั่นคงทางอารมณ์สูง ไม่ค่อยหวั่นไหวกับเรื่องเล็กน้อย และมักจะเป็นคนที่ทุกคนวิ่งเข้ามาขอคำปรึกษาเมื่อมีปัญหา ความสงบและความอบอุ่นของคุณทำให้คนรอบตัวรู้สึกปลอดภัย คุณมีความสตรองทั้งภายนอกและภายใน แม้จะดูเหมือนเรื่อยๆ แต่จริงๆ แล้วคุณคิดรอบคอบและพร้อมรับมือกับทุกสถานการณ์อย่างมั่นคงเสมอ"
+    }
+  };
+
+  const CAT_TYPES = ["orange", "persian", "siamese", "british"];
+  const QUESTIONS_PER_ROUND = 5;
+
+  let selectedQuestions = [];
+  let currentIndex = 0;
+  let scores = { orange: 0, persian: 0, siamese: 0, british: 0 };
+
+  const screenStart = document.getElementById("screen-start");
+  const screenQuiz = document.getElementById("screen-quiz");
+  const screenResult = document.getElementById("screen-result");
+
+  const progressFill = document.getElementById("progress-fill");
+  const progressLabel = document.getElementById("progress-label");
+  const questionText = document.getElementById("question-text");
+  const optionsContainer = document.getElementById("options-container");
+
+  document.getElementById("btn-start").addEventListener("click", startQuiz);
+  document.getElementById("btn-restart").addEventListener("click", startQuiz);
+
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function switchScreen(fromEl, toEl) {
+    fromEl.classList.add("exiting");
+    setTimeout(() => {
+      fromEl.classList.remove("active", "exiting");
+      toEl.classList.add("active");
+    }, 320);
+  }
+
+  function startQuiz() {
+    // สุ่มเลือกคำถาม 5 ข้อจากคลังทั้งหมด 10 ข้อ ทุกครั้งที่เริ่มเล่น
+    selectedQuestions = shuffleArray(QUESTION_BANK).slice(0, QUESTIONS_PER_ROUND);
+    currentIndex = 0;
+    scores = { orange: 0, persian: 0, siamese: 0, british: 0 };
+
+    const activeScreen = document.querySelector(".screen.active");
+    if (activeScreen === screenStart) {
+      switchScreen(screenStart, screenQuiz);
+    } else if (activeScreen === screenResult) {
+      switchScreen(screenResult, screenQuiz);
+    } else {
+      screenQuiz.classList.add("active");
+    }
+
+    setTimeout(renderQuestion, activeScreen === screenQuiz ? 0 : 340);
+  }
+
+  function renderQuestion() {
+    const q = selectedQuestions[currentIndex];
+    const letters = ["A", "B", "C", "D"];
+
+    progressFill.style.width = ((currentIndex) / QUESTIONS_PER_ROUND * 100) + "%";
+    progressLabel.textContent = `ข้อ ${currentIndex + 1} / ${QUESTIONS_PER_ROUND}`;
+
+    questionText.style.opacity = 0;
+    optionsContainer.style.opacity = 0;
+
+    setTimeout(() => {
+      questionText.textContent = q.question;
+      optionsContainer.innerHTML = "";
+
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.innerHTML = `<span class="option-letter">${letters[i]}</span>${opt.text}`;
+        btn.addEventListener("click", () => selectOption(opt.type, btn));
+        optionsContainer.appendChild(btn);
+      });
+
+      questionText.style.transition = "opacity 0.3s ease";
+      optionsContainer.style.transition = "opacity 0.3s ease";
+      questionText.style.opacity = 1;
+      optionsContainer.style.opacity = 1;
+    }, 150);
+  }
+
+  function selectOption(type, btnEl) {
+    document.querySelectorAll(".option-btn").forEach(b => {
+      b.disabled = true;
+      b.classList.remove("selected");
+    });
+    btnEl.classList.add("selected");
+
+    scores[type]++;
+
+    setTimeout(() => {
+      currentIndex++;
+      if (currentIndex < selectedQuestions.length) {
+        renderQuestion();
+      } else {
+        finishQuiz();
+      }
+    }, 450);
+  }
+
+  function finishQuiz() {
+    progressFill.style.width = "100%";
+    progressLabel.textContent = `ข้อ ${selectedQuestions.length} / ${QUESTIONS_PER_ROUND}`;
+
+    // หาประเภทแมวที่คะแนนสูงสุด ถ้าคะแนนเท่ากันให้สุ่มเลือกจากกลุ่มที่คะแนนสูงสุด
+    let maxScore = Math.max(...CAT_TYPES.map(t => scores[t]));
+    let topTypes = CAT_TYPES.filter(t => scores[t] === maxScore);
+    let winner = topTypes[Math.floor(Math.random() * topTypes.length)];
+
+    renderResult(winner);
+
+    setTimeout(() => switchScreen(screenQuiz, screenResult), 400);
+  }
+
+  function renderResult(type) {
+    const r = RESULTS[type];
+    document.getElementById("result-img").src = r.img;
+    document.getElementById("result-img").alt = r.name;
+    document.getElementById("result-tag").textContent = "ผลลัพธ์ของวันนี้";
+    document.getElementById("result-tag").style.background = r.tagColor;
+    document.getElementById("result-title").textContent = r.name;
+    document.getElementById("result-color").textContent = "สี: " + r.color;
+    document.getElementById("result-desc").textContent = r.desc;
+
+    const barsContainer = document.getElementById("score-bars");
+    barsContainer.innerHTML = "";
+    const totalAnswered = selectedQuestions.length;
+
+    CAT_TYPES.forEach(t => {
+      const pct = Math.round((scores[t] / totalAnswered) * 100);
+      const row = document.createElement("div");
+      row.className = "score-row";
+      row.innerHTML = `
+        <span class="label">${RESULTS[t].name.split(" (")[0]}</span>
+        <div class="bar-bg"><div class="bar-fill" style="background:${RESULTS[t].tagColor}"></div></div>
+        <span>${pct}%</span>
+      `;
+      barsContainer.appendChild(row);
+      requestAnimationFrame(() => {
+        row.querySelector(".bar-fill").style.width = pct + "%";
+      });
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
